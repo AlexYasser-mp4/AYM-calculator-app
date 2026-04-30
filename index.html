@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AYM Videography Pricing Calculator</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AYM</div>
+      <div>
+        <h1>Videography Pricing Calculator</h1>
+        <p class="muted">Build a quote for your next shoot.</p>
+      </div>
+    </div>
+    <button id="toggleRates" class="ghost" type="button">Edit my rates</button>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>Project</h2>
+
+      <label>Project / client name
+        <input id="projectName" type="text" placeholder="e.g. Smith Wedding" />
+      </label>
+
+      <label>Service type
+        <select id="serviceType">
+          <option value="wedding">Wedding</option>
+          <option value="event">Event / Conference</option>
+          <option value="corporate">Corporate / Brand</option>
+          <option value="commercial">Commercial / Promo</option>
+          <option value="musicVideo">Music Video</option>
+          <option value="realEstate">Real Estate</option>
+          <option value="socialContent">Social Media Content</option>
+          <option value="documentary">Documentary / Interview</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+
+      <div class="row">
+        <label>Shoot hours
+          <input id="shootHours" type="number" min="0" step="0.5" value="6" />
+        </label>
+        <label>Camera setups
+          <input id="cameras" type="number" min="1" step="1" value="1" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Extra crew (besides you)
+          <input id="extraCrew" type="number" min="0" step="1" value="0" />
+        </label>
+        <label>Locations
+          <input id="locations" type="number" min="1" step="1" value="1" />
+        </label>
+      </div>
+
+      <h2>Post-production</h2>
+      <div class="row">
+        <label>Editing hours
+          <input id="editHours" type="number" min="0" step="0.5" value="8" />
+        </label>
+        <label>Final deliverables
+          <input id="deliverables" type="number" min="1" step="1" value="1" />
+        </label>
+      </div>
+
+      <label>Edit complexity
+        <select id="editComplexity">
+          <option value="1">Standard (cuts + music + color)</option>
+          <option value="1.25">Advanced (motion graphics, multi-cam sync)</option>
+          <option value="1.5">Heavy (VFX, animation, sound design)</option>
+        </select>
+      </label>
+
+      <h2>Add-ons</h2>
+      <div class="addons">
+        <label class="check"><input type="checkbox" data-addon="drone" /> Drone / aerial</label>
+        <label class="check"><input type="checkbox" data-addon="gimbal" /> Gimbal package</label>
+        <label class="check"><input type="checkbox" data-addon="lighting" /> Lighting kit</label>
+        <label class="check"><input type="checkbox" data-addon="audio" /> Pro audio package</label>
+        <label class="check"><input type="checkbox" data-addon="teleprompter" /> Teleprompter</label>
+        <label class="check"><input type="checkbox" data-addon="rawFootage" /> Deliver raw footage</label>
+      </div>
+
+      <h2>Logistics &amp; terms</h2>
+      <div class="row">
+        <label>Travel distance (miles, round trip)
+          <input id="travelMiles" type="number" min="0" step="1" value="0" />
+        </label>
+        <label>Turnaround
+          <select id="turnaround">
+            <option value="1">Standard (2–4 weeks)</option>
+            <option value="1.15">Expedited (1 week) +15%</option>
+            <option value="1.35">Rush (3 days) +35%</option>
+            <option value="1.6">Same week / 48h +60%</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Usage / licensing
+          <select id="usage">
+            <option value="1">Personal use</option>
+            <option value="1.25">Internal / social media</option>
+            <option value="1.5">Commercial / paid ads</option>
+            <option value="2">Broadcast / national campaign</option>
+          </select>
+        </label>
+        <label>Discount %
+          <input id="discount" type="number" min="0" max="100" step="1" value="0" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Sales tax %
+          <input id="tax" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Deposit %
+          <input id="deposit" type="number" min="0" max="100" step="1" value="50" />
+        </label>
+      </div>
+    </section>
+
+    <aside class="card summary">
+      <h2>Quote</h2>
+      <div id="quoteHeader" class="quote-header">
+        <div id="quoteTitle" class="quote-title">New project</div>
+        <div id="quoteSubtitle" class="muted"></div>
+      </div>
+
+      <ul id="lineItems" class="line-items"></ul>
+
+      <div class="totals">
+        <div class="row-flex"><span>Subtotal</span><strong id="subtotal">$0.00</strong></div>
+        <div class="row-flex muted"><span id="discountLabel">Discount</span><span id="discountAmt">−$0.00</span></div>
+        <div class="row-flex muted"><span id="taxLabel">Tax</span><span id="taxAmt">$0.00</span></div>
+        <div class="row-flex total"><span>Total</span><strong id="total">$0.00</strong></div>
+        <div class="row-flex muted"><span id="depositLabel">Deposit due</span><span id="depositAmt">$0.00</span></div>
+        <div class="row-flex muted"><span>Balance on delivery</span><span id="balanceAmt">$0.00</span></div>
+      </div>
+
+      <div class="actions">
+        <button id="copyQuote" type="button">Copy quote</button>
+        <button id="printQuote" class="ghost" type="button">Print / save PDF</button>
+        <button id="resetForm" class="ghost danger" type="button">Reset</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Rates editor -->
+  <dialog id="ratesDialog">
+    <form method="dialog" class="rates-form">
+      <h2>My rates</h2>
+      <p class="muted">Saved to this browser. Adjust to match how you charge.</p>
+
+      <div class="row">
+        <label>Shoot rate / hour
+          <input id="r_shoot" type="number" min="0" step="1" />
+        </label>
+        <label>Edit rate / hour
+          <input id="r_edit" type="number" min="0" step="1" />
+        </label>
+      </div>
+      <div class="row">
+        <label>Extra crew / hour each
+          <input id="r_crew" type="number" min="0" step="1" />
+        </label>
+        <label>Extra camera setup (flat)
+          <input id="r_camera" type="number" min="0" step="1" />
+        </label>
+      </div>
+      <div class="row">
+        <label>Extra location (flat)
+          <input id="r_location" type="number" min="0" step="1" />
+        </label>
+        <label>Extra deliverable (flat)
+          <input id="r_deliverable" type="number" min="0" step="1" />
+        </label>
+      </div>
+
+      <h3>Add-on flat fees</h3>
+      <div class="row">
+        <label>Drone <input id="r_drone" type="number" min="0" step="1" /></label>
+        <label>Gimbal <input id="r_gimbal" type="number" min="0" step="1" /></label>
+      </div>
+      <div class="row">
+        <label>Lighting <input id="r_lighting" type="number" min="0" step="1" /></label>
+        <label>Audio <input id="r_audio" type="number" min="0" step="1" /></label>
+      </div>
+      <div class="row">
+        <label>Teleprompter <input id="r_teleprompter" type="number" min="0" step="1" /></label>
+        <label>Raw footage <input id="r_rawFootage" type="number" min="0" step="1" /></label>
+      </div>
+
+      <h3>Travel</h3>
+      <div class="row">
+        <label>Free miles (round trip)
+          <input id="r_freeMiles" type="number" min="0" step="1" />
+        </label>
+        <label>$ per mile after
+          <input id="r_perMile" type="number" min="0" step="0.01" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button value="save" type="submit">Save</button>
+        <button id="resetRates" value="reset" type="submit" class="ghost danger">Reset to defaults</button>
+        <button value="cancel" type="submit" class="ghost">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
