@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AYM 2026 Income Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="finance.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AYM</div>
+      <div>
+        <h1>2026 Income Tracker</h1>
+        <p class="muted">Log every payment. See where the year stands.</p>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a href="index.html" class="navlink">Calculator</a>
+      <a href="finance.html" class="navlink active">Income</a>
+    </nav>
+  </header>
+
+  <main class="grid finance-grid">
+    <section class="card">
+      <h2>Add income</h2>
+
+      <form id="entryForm" class="entry-form">
+        <input type="hidden" id="entryId" />
+
+        <div class="row">
+          <label>Date
+            <input id="entryDate" type="date" required />
+          </label>
+          <label>Amount (USD)
+            <input id="entryAmount" type="number" min="0" step="0.01" required placeholder="0.00" />
+          </label>
+        </div>
+
+        <label>Client / source
+          <input id="entrySource" type="text" placeholder="e.g. Smith Wedding" required />
+        </label>
+
+        <div class="row">
+          <label>Category
+            <select id="entryCategory">
+              <option value="wedding">Wedding</option>
+              <option value="event">Event / Conference</option>
+              <option value="corporate">Corporate / Brand</option>
+              <option value="commercial">Commercial / Promo</option>
+              <option value="musicVideo">Music Video</option>
+              <option value="realEstate">Real Estate</option>
+              <option value="socialContent">Social Media Content</option>
+              <option value="documentary">Documentary / Interview</option>
+              <option value="licensing">Licensing / Royalties</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Status
+            <select id="entryStatus">
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Notes
+          <input id="entryNotes" type="text" placeholder="Invoice #, deposit / final, etc." />
+        </label>
+
+        <div class="actions">
+          <button type="submit" id="saveEntry">Add entry</button>
+          <button type="button" id="cancelEdit" class="ghost" hidden>Cancel</button>
+        </div>
+      </form>
+
+      <h2>Filter</h2>
+      <div class="row">
+        <label>Month
+          <select id="filterMonth">
+            <option value="all">All months</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="filterStatus">
+            <option value="all">All statuses</option>
+            <option value="paid">Paid only</option>
+            <option value="pending">Pending only</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="exportCsv" class="ghost">Export CSV</button>
+        <button type="button" id="importBtn" class="ghost">Import CSV</button>
+        <input type="file" id="importFile" accept=".csv,text/csv" hidden />
+        <button type="button" id="clearAll" class="ghost danger">Clear all</button>
+      </div>
+    </section>
+
+    <aside class="card summary">
+      <h2>2026 totals</h2>
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-label">Year to date (paid)</div>
+          <div class="kpi-value" id="kpiPaid">$0.00</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Pending</div>
+          <div class="kpi-value muted" id="kpiPending">$0.00</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Projected total</div>
+          <div class="kpi-value" id="kpiProjected">$0.00</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Entries</div>
+          <div class="kpi-value" id="kpiCount">0</div>
+        </div>
+      </div>
+
+      <h3>Monthly (paid)</h3>
+      <ul id="monthlyList" class="bars"></ul>
+
+      <h3>By category (paid)</h3>
+      <ul id="categoryList" class="bars"></ul>
+    </aside>
+  </main>
+
+  <section class="card entries-card">
+    <div class="entries-header">
+      <h2>Entries</h2>
+      <span class="muted" id="entriesCount">0 entries</span>
+    </div>
+    <div class="table-wrap">
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Source</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th class="num">Amount</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="entriesBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="finance.js"></script>
+</body>
+</html>

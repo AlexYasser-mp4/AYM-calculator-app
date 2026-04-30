@@ -1,0 +1,195 @@
+.topnav {
+  display: flex;
+  gap: 6px;
+  background: var(--panel-2);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.navlink {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.navlink:hover { color: var(--text); }
+.navlink.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #1a1a1a;
+}
+
+.finance-grid { grid-template-columns: 1fr 1.1fr; }
+@media (max-width: 880px) {
+  .finance-grid { grid-template-columns: 1fr; }
+}
+
+.entry-form input[type="date"] {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  color-scheme: dark;
+}
+.entry-form input[type="date"]:focus { border-color: var(--accent); }
+
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.kpi {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.kpi-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.kpi-value.muted { color: var(--muted); }
+
+.bars {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+.bars li {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+.bars li.empty {
+  display: block;
+  color: var(--muted);
+  text-align: center;
+  padding: 10px 0;
+}
+.bar-label { color: var(--muted); }
+.bar-track {
+  display: block;
+  height: 8px;
+  background: var(--panel-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  border-radius: 4px;
+  transition: width 0.2s;
+}
+.bar-amt {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  min-width: 80px;
+  text-align: right;
+}
+
+.entries-card {
+  margin: 0 28px 28px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.entries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.entries-header h2 { margin: 0; }
+
+.table-wrap { overflow-x: auto; }
+.entries-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.entries-table th,
+.entries-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.entries-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.entries-table td.num,
+.entries-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.entries-table .notes-col {
+  color: var(--muted);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.empty-row {
+  text-align: center !important;
+  color: var(--muted);
+  padding: 22px !important;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+}
+.pill-paid {
+  background: rgba(107, 212, 163, 0.15);
+  color: var(--good);
+  border: 1px solid rgba(107, 212, 163, 0.3);
+}
+.pill-pending {
+  background: rgba(224, 178, 101, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(224, 178, 101, 0.3);
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+button.link {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+}
+button.link:hover { background: var(--panel-2); }
+button.link.danger { color: var(--danger); }
