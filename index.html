@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AYM Videography Pricing Calculator</title>
+<title>AYM Studio</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -11,15 +11,104 @@
     <div class="brand">
       <div class="logo">AYM</div>
       <div>
-        <h1>Videography Pricing Calculator</h1>
-        <p class="muted">Build a quote for your next shoot.</p>
+        <h1>AYM Studio</h1>
+        <p class="muted">Clients, tasks, shoots, and pricing.</p>
       </div>
     </div>
-    <button id="toggleRates" class="ghost" type="button">Edit my rates</button>
+    <nav class="tab-nav">
+      <button class="tab" data-tab="clients" type="button">Clients</button>
+      <button class="tab" data-tab="tasks" type="button">Tasks</button>
+      <button class="tab" data-tab="calendar" type="button">Calendar</button>
+      <button class="tab" data-tab="calculator" type="button">Calculator</button>
+    </nav>
   </header>
 
-  <main class="grid">
+  <!-- ============ CLIENTS ============ -->
+  <main id="view-clients" class="view">
+    <div class="view-head">
+      <div>
+        <h2 class="no-caps section-title">Clients</h2>
+        <p class="muted">Track scope, deliverables, and what's needed each week and month.</p>
+      </div>
+      <div class="head-actions">
+        <button id="seedDemo" class="ghost" type="button">Load sample data</button>
+        <button id="addClient" type="button">+ New client</button>
+      </div>
+    </div>
+    <div class="clients-grid">
+      <aside class="card client-list-card">
+        <div id="clientList" class="client-list"></div>
+      </aside>
+      <section id="clientDetail" class="card client-detail"></section>
+    </div>
+  </main>
+
+  <!-- ============ TASKS ============ -->
+  <main id="view-tasks" class="view">
+    <div class="view-head">
+      <div>
+        <h2 class="no-caps section-title">Tasks</h2>
+        <p class="muted">Everything owed to your clients this week and month.</p>
+      </div>
+      <div class="head-actions">
+        <button id="addTask" type="button">+ New task</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <button class="filter-chip" data-filter="all" type="button">All</button>
+        <button class="filter-chip" data-filter="open" type="button">Open</button>
+        <button class="filter-chip" data-filter="today" type="button">Today</button>
+        <button class="filter-chip" data-filter="overdue" type="button">Overdue</button>
+        <button class="filter-chip" data-filter="week" type="button">This week</button>
+        <button class="filter-chip" data-filter="month" type="button">This month</button>
+        <button class="filter-chip" data-filter="done" type="button">Done</button>
+      </div>
+      <label class="filter-select">
+        <span class="muted">Client</span>
+        <select id="taskClientFilter"></select>
+      </label>
+    </div>
+    <div id="taskList" class="task-list card"></div>
+  </main>
+
+  <!-- ============ CALENDAR ============ -->
+  <main id="view-calendar" class="view">
+    <div class="view-head">
+      <div>
+        <h2 class="no-caps section-title">Shoot calendar</h2>
+        <p class="muted">Block out shoot days and see what's coming.</p>
+      </div>
+      <div class="head-actions">
+        <button id="addShoot" type="button">+ Add shoot day</button>
+      </div>
+    </div>
+    <div class="calendar-grid">
+      <section class="card">
+        <div class="cal-nav">
+          <button id="calPrev" class="ghost small" type="button">‹</button>
+          <div id="calMonthLabel" class="cal-month-label"></div>
+          <button id="calNext" class="ghost small" type="button">›</button>
+          <button id="calToday" class="ghost small" type="button" style="margin-left:auto">Today</button>
+        </div>
+        <div id="calendarGrid" class="cal-grid"></div>
+      </section>
+      <aside class="card">
+        <h3>Upcoming shoots</h3>
+        <div id="upcomingShoots"></div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ============ CALCULATOR (existing) ============ -->
+  <main id="view-calculator" class="view">
+    <div class="grid">
     <section class="card">
+      <div class="row-between">
+        <h2 class="no-caps section-title" style="margin:0">Videography pricing calculator</h2>
+        <button id="toggleRates" class="ghost" type="button">Edit my rates</button>
+      </div>
+
       <h2>Project</h2>
 
       <label>Project / client name
@@ -149,6 +238,7 @@
         <button id="resetForm" class="ghost danger" type="button">Reset</button>
       </div>
     </aside>
+    </div>
   </main>
 
   <!-- Rates editor -->
@@ -214,6 +304,135 @@
     </form>
   </dialog>
 
+  <!-- Client editor -->
+  <dialog id="clientDialog">
+    <form id="clientForm" method="dialog" class="rates-form">
+      <h2>Client</h2>
+      <div class="row">
+        <label>Name
+          <input id="c_name" type="text" required placeholder="Studio name or person" />
+        </label>
+        <label>Contact
+          <input id="c_contact" type="text" placeholder="Email or phone" />
+        </label>
+      </div>
+      <div class="row">
+        <label>Status
+          <select id="c_status">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+        <label>Retainer / typical $
+          <input id="c_rate" type="number" min="0" step="1" placeholder="e.g. 1500" />
+        </label>
+      </div>
+      <label>Scope of work
+        <textarea id="c_scope" rows="4" placeholder="What are you delivering for this client? Include cadence, formats, revisions, etc."></textarea>
+      </label>
+
+      <h3>Recurring deliverables</h3>
+      <div id="c_recurring" class="recurring-list"></div>
+      <button id="c_addRecurring" type="button" class="ghost small">+ Add deliverable</button>
+
+      <div class="row">
+        <label>Color tag
+          <input id="c_color" type="color" />
+        </label>
+      </div>
+      <label>Notes
+        <textarea id="c_notes" rows="3" placeholder="Anything you want to remember about this client."></textarea>
+      </label>
+
+      <div class="actions">
+        <button value="save" type="submit">Save</button>
+        <button value="cancel" type="submit" class="ghost">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Task editor -->
+  <dialog id="taskDialog">
+    <form id="taskForm" method="dialog" class="rates-form">
+      <h2>Task</h2>
+      <label>Title
+        <input id="t_title" type="text" required placeholder="e.g. Edit Elm St walkthrough" />
+      </label>
+      <div class="row">
+        <label>Client
+          <select id="t_client"></select>
+        </label>
+        <label>Due date
+          <input id="t_due" type="date" />
+        </label>
+      </div>
+      <div class="row">
+        <label>Priority
+          <select id="t_priority">
+            <option value="low">Low</option>
+            <option value="med" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="t_status">
+            <option value="todo">To do</option>
+            <option value="doing">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </label>
+      </div>
+      <label>Notes
+        <textarea id="t_notes" rows="3"></textarea>
+      </label>
+
+      <div class="actions">
+        <button value="save" type="submit">Save</button>
+        <button id="t_delete" value="delete" type="submit" class="ghost danger">Delete</button>
+        <button value="cancel" type="submit" class="ghost">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Shoot day editor -->
+  <dialog id="shootDialog">
+    <form id="shootForm" method="dialog" class="rates-form">
+      <h2>Shoot day</h2>
+      <label>Title (optional)
+        <input id="s_title" type="text" placeholder="e.g. Cafe menu shoot" />
+      </label>
+      <div class="row">
+        <label>Client
+          <select id="s_client"></select>
+        </label>
+        <label>Date
+          <input id="s_date" type="date" required />
+        </label>
+      </div>
+      <div class="row">
+        <label>Start
+          <input id="s_start" type="time" />
+        </label>
+        <label>End
+          <input id="s_end" type="time" />
+        </label>
+      </div>
+      <label>Location
+        <input id="s_location" type="text" placeholder="Address or venue" />
+      </label>
+      <label>Notes
+        <textarea id="s_notes" rows="3" placeholder="Call sheet, contact, gear notes..."></textarea>
+      </label>
+      <div class="actions">
+        <button value="save" type="submit">Save</button>
+        <button id="s_delete" value="delete" type="submit" class="ghost danger">Delete</button>
+        <button value="cancel" type="submit" class="ghost">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="studio.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
