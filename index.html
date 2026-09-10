@@ -148,12 +148,16 @@
       </div>
 
       <h2>Post-production</h2>
+      <label>Deliverables</label>
+      <div id="deliverablesList" class="deliverables-list"></div>
+      <button id="addDeliverable" type="button" class="ghost small">+ Add deliverable</button>
+
       <div class="row">
-        <label>Editing hours
-          <input id="editHours" type="number" min="0" step="0.5" value="8" />
+        <label>Included revision rounds
+          <input id="includedRevisions" type="number" min="0" step="1" value="2" />
         </label>
-        <label>Final deliverables
-          <input id="deliverables" type="number" min="1" step="1" value="1" />
+        <label>Extra revision rounds
+          <input id="extraRevisions" type="number" min="0" step="1" value="0" />
         </label>
       </div>
 
@@ -251,8 +255,8 @@
         <label>Shoot rate / hour
           <input id="r_shoot" type="number" min="0" step="1" />
         </label>
-        <label>Edit rate / hour
-          <input id="r_edit" type="number" min="0" step="1" />
+        <label>Per finished minute of video
+          <input id="r_perMinute" type="number" min="0" step="1" />
         </label>
       </div>
       <div class="row">
@@ -267,8 +271,8 @@
         <label>Extra location (flat)
           <input id="r_location" type="number" min="0" step="1" />
         </label>
-        <label>Extra deliverable (flat)
-          <input id="r_deliverable" type="number" min="0" step="1" />
+        <label>Extra revision round
+          <input id="r_revisionRound" type="number" min="0" step="1" />
         </label>
       </div>
 
