@@ -860,8 +860,74 @@ function updateThemeToggle() {
   btn.title = t === "dark" ? "Switch to light mode" : "Switch to dark mode";
 }
 
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  // Only register when served over http(s); file:// won't work.
+  if (location.protocol !== "http:" && location.protocol !== "https:") return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
+const EXPORT_KEYS = [
+  "aym-studio-v1",
+  "aym.rates.v1",
+  "aym.form.v1",
+  "aym.presets.v1",
+  "aym.quotes.v1",
+  "aym-theme",
+  "aym-active-tab",
+];
+
+function exportAllData() {
+  const data = {};
+  for (const k of EXPORT_KEYS) {
+    const raw = localStorage.getItem(k);
+    if (raw != null) data[k] = raw;
+  }
+  const payload = {
+    app: "aym-studio",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `aym-studio-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || parsed.app !== "aym-studio" || !parsed.data) {
+        alert("This file doesn't look like an AYM Studio export.");
+        return;
+      }
+      if (!confirm("Replace all current data with this file? This can't be undone.")) return;
+      for (const k of EXPORT_KEYS) localStorage.removeItem(k);
+      for (const [k, v] of Object.entries(parsed.data)) {
+        if (typeof v === "string") localStorage.setItem(k, v);
+      }
+      location.reload();
+    } catch (e) {
+      alert("Could not read that file.");
+    }
+  };
+  reader.readAsText(file);
+}
+
 function initStudio() {
   initTheme();
+  registerServiceWorker();
   initTabs();
 
   $("#addClient").addEventListener("click", () => openClientDialog(null));
@@ -889,6 +955,20 @@ function initStudio() {
 
   const seed = $("#seedDemo");
   if (seed) seed.addEventListener("click", seedDemoData);
+
+  const exportBtn = $("#exportData");
+  if (exportBtn) exportBtn.addEventListener("click", exportAllData);
+
+  const importBtn = $("#importData");
+  const importFile = $("#importFile");
+  if (importBtn && importFile) {
+    importBtn.addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) importAllData(f);
+      importFile.value = "";
+    });
+  }
 }
 
 function shiftMonth(delta) {

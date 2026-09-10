@@ -4,6 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AYM Studio</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="theme-color" content="#faf6ec" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#201d1a" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="AYM Studio" />
 <script>
   (function () {
     try {
@@ -32,6 +40,9 @@
         <button class="tab" data-tab="calendar" type="button">Calendar</button>
         <button class="tab" data-tab="calculator" type="button">Calculator</button>
       </nav>
+      <button id="syncToggle" class="theme-toggle" type="button" title="Sync across devices" aria-label="Sync status">
+        <span class="sync-icon">☁</span>
+      </button>
       <button id="themeToggle" class="theme-toggle" type="button" title="Toggle light/dark" aria-label="Toggle light/dark theme">
         <span class="theme-icon">☾</span>
       </button>
@@ -46,6 +57,9 @@
         <p class="muted">Track scope, deliverables, and what's needed each week and month.</p>
       </div>
       <div class="head-actions">
+        <button id="exportData" class="ghost" type="button" title="Download all data as a JSON file">Export data</button>
+        <button id="importData" class="ghost" type="button" title="Load data from a JSON file">Import data</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden />
         <button id="seedDemo" class="ghost" type="button">Load sample data</button>
         <button id="addClient" type="button">+ New client</button>
       </div>
@@ -497,7 +511,41 @@
     </form>
   </dialog>
 
+  <!-- Sync dialog -->
+  <dialog id="syncDialog">
+    <form id="syncForm" method="dialog" class="rates-form">
+      <h2>Sync across devices</h2>
+      <p class="muted">Sign in once on every device. Your clients, tasks, shoots, quotes and templates stay in sync automatically.</p>
+
+      <div id="syncSignedOutBlock">
+        <label>Email
+          <input id="syncEmailInput" type="email" required autocomplete="email" placeholder="you@example.com" />
+        </label>
+        <label>Password
+          <input id="syncPasswordInput" type="password" required autocomplete="current-password" minlength="6" placeholder="At least 6 characters" />
+        </label>
+        <p id="syncMsg" class="muted small" style="min-height: 18px"></p>
+        <div class="actions">
+          <button value="signin" type="submit">Sign in</button>
+          <button value="signup" type="submit" class="ghost">Create account</button>
+          <button value="cancel" type="submit" class="ghost">Cancel</button>
+        </div>
+      </div>
+
+      <div id="syncSignedInBlock" hidden>
+        <p>Signed in as <strong id="syncEmail"></strong></p>
+        <p class="muted small">Changes push to Supabase within a second. Other devices signed into the same account get them in real time.</p>
+        <div class="actions">
+          <button value="close" type="submit">Done</button>
+          <button value="signout" type="submit" class="ghost danger">Sign out</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="studio.js"></script>
   <script src="app.js"></script>
+  <script src="sync.js"></script>
 </body>
 </html>
