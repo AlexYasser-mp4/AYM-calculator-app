@@ -38,18 +38,6 @@ const SERVICE_LABELS = {
   other: "Other",
 };
 
-const SERVICE_MIN = {
-  wedding: 1500,
-  event: 800,
-  corporate: 750,
-  commercial: 1200,
-  musicVideo: 1000,
-  realEstate: 250,
-  socialContent: 400,
-  documentary: 600,
-  other: 0,
-};
-
 const RATES_KEY = "aym.rates.v1";
 const FORM_KEY = "aym.form.v1";
 
@@ -299,17 +287,7 @@ function calculate() {
     baseTotal += usageAmt;
   }
 
-  // Apply service minimum
-  const minimum = SERVICE_MIN[f.serviceType] || 0;
-  let subtotal = baseTotal;
-  if (subtotal > 0 && subtotal < minimum) {
-    items.push({
-      desc: `${SERVICE_LABELS[f.serviceType]} package minimum`,
-      amt: minimum - subtotal,
-    });
-    subtotal = minimum;
-  }
-
+  const subtotal = baseTotal;
   const discountAmt = subtotal * (f.discount / 100);
   const afterDiscount = subtotal - discountAmt;
   const taxAmt = afterDiscount * (f.tax / 100);
