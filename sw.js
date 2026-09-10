@@ -1,13 +1,14 @@
 /* AYM Studio service worker.
    Network-first for same-origin GETs so code updates land on refresh;
    falls back to cache when offline. Bump CACHE_NAME on breaking changes. */
-const CACHE_NAME = "aym-studio-v1";
+const CACHE_NAME = "aym-studio-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./studio.js",
+  "./sync.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
