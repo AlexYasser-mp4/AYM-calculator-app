@@ -4,6 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AYM Studio</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="theme-color" content="#faf6ec" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#201d1a" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="AYM Studio" />
 <script>
   (function () {
     try {
@@ -46,6 +54,9 @@
         <p class="muted">Track scope, deliverables, and what's needed each week and month.</p>
       </div>
       <div class="head-actions">
+        <button id="exportData" class="ghost" type="button" title="Download all data as a JSON file">Export data</button>
+        <button id="importData" class="ghost" type="button" title="Load data from a JSON file">Import data</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden />
         <button id="seedDemo" class="ghost" type="button">Load sample data</button>
         <button id="addClient" type="button">+ New client</button>
       </div>
