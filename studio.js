@@ -826,7 +826,42 @@ function removeShoot(id) {
 
 /* --- Wire buttons -------------------------------------------- */
 
+function initTheme() {
+  const stored = localStorage.getItem("aym-theme"); // "light" | "dark" | null
+  if (stored === "light" || stored === "dark") {
+    document.documentElement.setAttribute("data-theme", stored);
+  }
+  updateThemeToggle();
+
+  const btn = $("#themeToggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const current = currentTheme();
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("aym-theme", next);
+    updateThemeToggle();
+  });
+}
+
+function currentTheme() {
+  const attr = document.documentElement.getAttribute("data-theme");
+  if (attr === "dark" || attr === "light") return attr;
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark" : "light";
+}
+
+function updateThemeToggle() {
+  const btn = $("#themeToggle");
+  if (!btn) return;
+  const t = currentTheme();
+  const icon = btn.querySelector(".theme-icon");
+  if (icon) icon.textContent = t === "dark" ? "☀" : "☾";
+  btn.title = t === "dark" ? "Switch to light mode" : "Switch to dark mode";
+}
+
 function initStudio() {
+  initTheme();
   initTabs();
 
   $("#addClient").addEventListener("click", () => openClientDialog(null));

@@ -4,6 +4,16 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AYM Studio</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("aym-theme");
+      if (t === "light" || t === "dark") {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    } catch (_) {}
+  })();
+</script>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,12 +25,17 @@
         <p class="muted">Clients, tasks, shoots, and pricing.</p>
       </div>
     </div>
-    <nav class="tab-nav">
-      <button class="tab" data-tab="clients" type="button">Clients</button>
-      <button class="tab" data-tab="tasks" type="button">Tasks</button>
-      <button class="tab" data-tab="calendar" type="button">Calendar</button>
-      <button class="tab" data-tab="calculator" type="button">Calculator</button>
-    </nav>
+    <div class="topbar-right">
+      <nav class="tab-nav">
+        <button class="tab" data-tab="clients" type="button">Clients</button>
+        <button class="tab" data-tab="tasks" type="button">Tasks</button>
+        <button class="tab" data-tab="calendar" type="button">Calendar</button>
+        <button class="tab" data-tab="calculator" type="button">Calculator</button>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" type="button" title="Toggle light/dark" aria-label="Toggle light/dark theme">
+        <span class="theme-icon">☾</span>
+      </button>
+    </div>
   </header>
 
   <!-- ============ CLIENTS ============ -->

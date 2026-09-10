@@ -1,18 +1,55 @@
 :root {
+  color-scheme: light;
   --bg: #faf6ec;
-  --panel: #ffffff;
+  --panel: #3d3835;
   --panel-2: #f2ecdd;
   --border: #d6cdb8;
   --text: #25211f;
   --muted: #7a7168;
+  --on-panel: #faf6ec;
+  --on-panel-muted: #b8afa2;
   --accent: #dc6a2c;
   --accent-2: #b8551f;
   --dark: #3d3835;
   --danger: #b8412c;
   --good: #5a8d6b;
   --warn: #c98c3c;
-  --shadow: 0 6px 24px rgba(61, 56, 53, 0.10);
+  --shadow: 0 6px 24px rgba(37, 33, 31, 0.18);
   --hover: #ebe3ce;
+}
+
+/* Dark theme: applied when the OS is dark and the user hasn't picked
+   light, or when they've picked dark. Panel color stays the same warm
+   dark grey so cards read consistently across modes; only the page bg
+   and text swap. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #201d1a;
+    --panel: #3d3835;
+    --panel-2: #4a4340;
+    --border: #55504c;
+    --text: #faf6ec;
+    --muted: #b8afa2;
+    --on-panel: #faf6ec;
+    --on-panel-muted: #b8afa2;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    --hover: #55504c;
+  }
+}
+/* Explicit dark selector last so the toggle wins over the media query. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #201d1a;
+  --panel: #3d3835;
+  --panel-2: #4a4340;
+  --border: #55504c;
+  --text: #faf6ec;
+  --muted: #b8afa2;
+  --on-panel: #faf6ec;
+  --on-panel-muted: #b8afa2;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --hover: #55504c;
 }
 
 * { box-sizing: border-box; }
@@ -35,8 +72,27 @@ html, body {
   padding: 16px 28px;
   border-bottom: 1px solid var(--border);
   background: var(--panel);
+  color: var(--on-panel);
   flex-wrap: wrap;
 }
+.topbar h1 { color: var(--on-panel); }
+.topbar .muted { color: var(--on-panel-muted); }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid rgba(250,246,236,0.30);
+  color: var(--on-panel);
+  width: 36px; height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+.theme-toggle:hover { background: rgba(250,246,236,0.10); }
+.theme-toggle:active { transform: translateY(1px); }
 
 .brand { display: flex; align-items: center; gap: 14px; }
 .logo {
@@ -75,8 +131,8 @@ p { margin: 4px 0; }
 .tab-nav .tab:hover { color: var(--text); }
 .tab-nav .tab.active {
   background: var(--panel);
-  color: var(--text);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  color: var(--on-panel);
+  box-shadow: 0 1px 2px rgba(37,33,31,0.15) inset;
 }
 
 .view { display: none; padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
@@ -103,11 +159,32 @@ p { margin: 4px 0; }
 
 .card {
   background: var(--panel);
+  color: var(--on-panel);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 22px;
   box-shadow: var(--shadow);
 }
+.card h1, .card h2, .card h3,
+.card h2.no-caps, .card .section-title,
+.card .quote-title { color: var(--on-panel); }
+.card h2, .card h3 { color: var(--on-panel-muted); }
+.card h2.no-caps, .card .section-title { color: var(--on-panel); }
+.card label, .card .muted { color: var(--on-panel-muted); }
+.card .line-items li .desc,
+.card .line-items li .amt { color: var(--on-panel); }
+.card .totals { border-top-color: rgba(250,246,236,0.18); }
+.card .quote-header { border-bottom-color: rgba(250,246,236,0.18); }
+.card .line-items li { border-bottom-color: rgba(250,246,236,0.10); }
+.card .row-flex.total { border-top-color: rgba(250,246,236,0.18); }
+.card .row-flex.total strong { color: var(--accent); }
+
+/* Sub-cards inside a dark card use the beige surface, so their text
+   returns to the light-panel scheme. */
+.sub-card { color: var(--text); }
+.sub-card h1, .sub-card h2, .sub-card h3, .sub-card h2.no-caps { color: var(--muted); }
+.sub-card h2.no-caps, .sub-card .section-title { color: var(--text); }
+.sub-card .muted, .sub-card label { color: var(--muted); }
 .sub-card {
   background: var(--panel-2);
   border: 1px solid var(--border);
@@ -202,6 +279,23 @@ button.icon {
 button.icon:hover { background: var(--panel-2); color: var(--text); }
 button.icon.danger:hover { color: var(--danger); }
 
+/* Overrides so ghost / icon buttons stay visible on dark cards. */
+.card button.ghost { color: var(--on-panel); border-color: rgba(250,246,236,0.30); }
+.card button.ghost.danger { color: var(--danger); border-color: rgba(184,65,44,0.5); }
+.card button.icon { color: var(--on-panel-muted); }
+.card button.icon:hover { background: rgba(250,246,236,0.10); color: var(--on-panel); }
+.card .task-group-head strong { color: var(--on-panel); }
+.card .chip-empty { color: var(--on-panel-muted); }
+.card .empty { color: var(--on-panel-muted); }
+.card .cal-weekday { color: var(--on-panel-muted); }
+.card .cal-month-label { color: var(--on-panel); }
+/* But sub-cards are beige, so buttons inside them go back to the light-panel scheme. */
+.sub-card button.ghost { color: var(--text); border-color: var(--border); }
+.sub-card button.ghost.danger { color: var(--danger); border-color: rgba(184,65,44,0.4); }
+.sub-card button.icon { color: var(--muted); }
+.sub-card button.icon:hover { background: var(--panel); color: var(--on-panel); }
+.sub-card .task-group-head strong { color: var(--text); }
+
 /* --- Quote (calculator) ------------------------------------- */
 .summary { position: sticky; top: 20px; align-self: start; }
 .quote-header { padding-bottom: 14px; border-bottom: 1px dashed var(--border); margin-bottom: 12px; }
@@ -248,10 +342,10 @@ button.icon.danger:hover { color: var(--danger); }
   cursor: pointer; transition: background 0.15s;
   border: 1px solid transparent;
 }
-.client-row:hover { background: var(--panel-2); }
+.client-row:hover { background: rgba(250,246,236,0.08); }
 .client-row.selected {
-  background: var(--panel-2);
-  border-color: var(--border);
+  background: rgba(220,106,44,0.18);
+  border-color: rgba(220,106,44,0.35);
 }
 .client-row-body { flex: 1; min-width: 0; }
 .client-row-name { font-weight: 600; }
@@ -283,8 +377,8 @@ button.icon.danger:hover { color: var(--danger); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--text);
+  border: 1px solid var(--panel);
+  color: var(--on-panel);
   padding: 5px 10px; border-radius: 999px;
   font-size: 12px;
 }
@@ -293,13 +387,14 @@ button.icon.danger:hover { color: var(--danger); }
 .list-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px;
-  background: var(--panel);
+  background: var(--panel-2);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 6px;
   cursor: pointer;
 }
-.list-item:hover { background: var(--panel-2); }
+.list-item:hover { background: var(--hover); }
 .list-item-body { flex: 1; min-width: 0; }
 .badge {
   display: inline-block;
@@ -307,8 +402,8 @@ button.icon.danger:hover { color: var(--danger); }
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--muted);
+  border: 1px solid var(--panel);
+  color: var(--on-panel-muted);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -397,12 +492,12 @@ button.icon.danger:hover { color: var(--danger); }
 .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .filter-chip {
   background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--muted);
+  border: 1px solid var(--panel);
+  color: var(--on-panel-muted);
   padding: 6px 12px; border-radius: 999px;
   font-size: 13px; font-weight: 500;
 }
-.filter-chip:hover { color: var(--text); }
+.filter-chip:hover { color: var(--on-panel); }
 .filter-chip.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #ffffff;
