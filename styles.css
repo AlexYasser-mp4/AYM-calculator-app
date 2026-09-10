@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #faf6ec;
   --panel: #3d3835;
   --panel-2: #f2ecdd;
@@ -15,6 +16,40 @@
   --warn: #c98c3c;
   --shadow: 0 6px 24px rgba(37, 33, 31, 0.18);
   --hover: #ebe3ce;
+}
+
+/* Dark theme: applied when the OS is dark and the user hasn't picked
+   light, or when they've picked dark. Panel color stays the same warm
+   dark grey so cards read consistently across modes; only the page bg
+   and text swap. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #201d1a;
+    --panel: #3d3835;
+    --panel-2: #4a4340;
+    --border: #55504c;
+    --text: #faf6ec;
+    --muted: #b8afa2;
+    --on-panel: #faf6ec;
+    --on-panel-muted: #b8afa2;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    --hover: #55504c;
+  }
+}
+/* Explicit dark selector last so the toggle wins over the media query. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #201d1a;
+  --panel: #3d3835;
+  --panel-2: #4a4340;
+  --border: #55504c;
+  --text: #faf6ec;
+  --muted: #b8afa2;
+  --on-panel: #faf6ec;
+  --on-panel-muted: #b8afa2;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --hover: #55504c;
 }
 
 * { box-sizing: border-box; }
@@ -42,6 +77,22 @@ html, body {
 }
 .topbar h1 { color: var(--on-panel); }
 .topbar .muted { color: var(--on-panel-muted); }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid rgba(250,246,236,0.30);
+  color: var(--on-panel);
+  width: 36px; height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+.theme-toggle:hover { background: rgba(250,246,236,0.10); }
+.theme-toggle:active { transform: translateY(1px); }
 
 .brand { display: flex; align-items: center; gap: 14px; }
 .logo {
