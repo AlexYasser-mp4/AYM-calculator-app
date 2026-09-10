@@ -301,6 +301,15 @@ function renderClientDetail() {
   ]);
   wrap.appendChild(taskSec);
 
+  // Saved quotes for this client
+  const savedQuotes = loadQuotesForClient(c.id);
+  wrap.appendChild(el("section", { class: "sub-card" }, [
+    el("h3", {}, "Saved quotes"),
+    savedQuotes.length
+      ? el("div", {}, savedQuotes.map(quoteLine))
+      : el("div", { class: "muted" }, "None yet. Build one on the Calculator tab and use “Save to client”."),
+  ]));
+
   // Notes
   if (c.notes) {
     wrap.appendChild(el("section", { class: "sub-card" }, [
@@ -308,6 +317,30 @@ function renderClientDetail() {
       el("div", { class: "scope-text" }, c.notes),
     ]));
   }
+}
+
+function loadQuotesForClient(clientId) {
+  try {
+    const all = JSON.parse(localStorage.getItem("aym.quotes.v1") || "[]");
+    return all
+      .filter((q) => q.clientId === clientId)
+      .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+  } catch { return []; }
+}
+
+function fmtMoney(n) {
+  return (n || 0).toLocaleString("en-US", { style: "currency", currency: "USD" });
+}
+
+function quoteLine(q) {
+  const d = new Date(q.savedAt || Date.now());
+  return el("div", { class: "quote-line" }, [
+    el("div", { class: "quote-line-body" }, [
+      el("div", {}, el("strong", {}, q.projectName || "Untitled quote")),
+      el("div", { class: "muted small" }, d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })),
+    ]),
+    el("span", { class: "quote-line-total" }, fmtMoney(q.total)),
+  ]);
 }
 
 function renderRecurringList(c) {

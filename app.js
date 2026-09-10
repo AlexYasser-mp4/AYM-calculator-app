@@ -15,6 +15,7 @@ const DEFAULT_RATES = {
   rawFootage: 200,
   freeMiles: 30,
   perMile: 0.7,
+  roundTo: 0,
 };
 
 const DEFAULT_DELIVERABLES = [
@@ -38,20 +39,11 @@ const SERVICE_LABELS = {
   other: "Other",
 };
 
-const SERVICE_MIN = {
-  wedding: 1500,
-  event: 800,
-  corporate: 750,
-  commercial: 1200,
-  musicVideo: 1000,
-  realEstate: 250,
-  socialContent: 400,
-  documentary: 600,
-  other: 0,
-};
-
 const RATES_KEY = "aym.rates.v1";
 const FORM_KEY = "aym.form.v1";
+const PRESETS_KEY = "aym.presets.v1";
+const QUOTES_KEY = "aym.quotes.v1";
+const STUDIO_KEY = "aym-studio-v1"; // shared with studio.js
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -71,6 +63,30 @@ function saveRates(rates) {
 let rates = loadRates();
 
 let deliverables = DEFAULT_DELIVERABLES.map((d) => ({ ...d }));
+let customLines = []; // [{ desc, amt }]
+
+function loadPresets() {
+  try { return JSON.parse(localStorage.getItem(PRESETS_KEY) || "[]"); }
+  catch { return []; }
+}
+function savePresets(list) { localStorage.setItem(PRESETS_KEY, JSON.stringify(list)); }
+
+function loadQuotes() {
+  try { return JSON.parse(localStorage.getItem(QUOTES_KEY) || "[]"); }
+  catch { return []; }
+}
+function saveQuotes(list) { localStorage.setItem(QUOTES_KEY, JSON.stringify(list)); }
+
+function loadStudioClients() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STUDIO_KEY) || "{}");
+    return Array.isArray(s.clients) ? s.clients : [];
+  } catch { return []; }
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
 
 function readForm() {
   const addons = {};
@@ -80,11 +96,13 @@ function readForm() {
   return {
     projectName: $("projectName").value.trim(),
     serviceType: $("serviceType").value,
+    linkedClient: $("linkedClient") ? $("linkedClient").value : "",
     shootHours: +$("shootHours").value || 0,
     cameras: +$("cameras").value || 1,
     extraCrew: +$("extraCrew").value || 0,
     locations: +$("locations").value || 1,
     deliverables: deliverables.slice(),
+    customLines: customLines.slice(),
     includedRevisions: +$("includedRevisions").value || 0,
     extraRevisions: +$("extraRevisions").value || 0,
     editComplexity: +$("editComplexity").value || 1,
@@ -120,6 +138,13 @@ function restoreForm() {
         qty: +d.qty || 1,
       }));
     }
+    if (Array.isArray(f.customLines)) {
+      customLines = f.customLines.map((c) => ({
+        desc: String(c.desc || ""),
+        amt: +c.amt || 0,
+      }));
+    }
+    if (f.linkedClient != null && $("linkedClient")) $("linkedClient").value = f.linkedClient;
     if (f.addons) {
       document.querySelectorAll('[data-addon]').forEach((el) => {
         el.checked = !!f.addons[el.dataset.addon];
@@ -189,6 +214,100 @@ function renderDeliverablesList() {
     });
     document.body.appendChild(dl);
   }
+}
+
+function renderCustomLines() {
+  const wrap = $("customLinesList");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  customLines.forEach((c, idx) => {
+    const row = document.createElement("div");
+    row.className = "custom-row";
+
+    const desc = document.createElement("input");
+    desc.type = "text";
+    desc.placeholder = "Description";
+    desc.value = c.desc;
+    desc.addEventListener("input", (e) => { customLines[idx].desc = e.target.value; render(); });
+
+    const amt = document.createElement("input");
+    amt.type = "number";
+    amt.min = "0";
+    amt.step = "0.01";
+    amt.placeholder = "$";
+    amt.value = c.amt;
+    amt.addEventListener("input", (e) => { customLines[idx].amt = +e.target.value || 0; render(); });
+
+    const rm = document.createElement("button");
+    rm.type = "button";
+    rm.className = "icon danger";
+    rm.title = "Remove";
+    rm.textContent = "×";
+    rm.addEventListener("click", () => {
+      customLines.splice(idx, 1);
+      renderCustomLines();
+      render();
+    });
+
+    row.appendChild(desc);
+    row.appendChild(amt);
+    row.appendChild(rm);
+    wrap.appendChild(row);
+  });
+}
+
+function renderPresetChips() {
+  const wrap = $("presetChips");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  const presets = loadPresets();
+  if (presets.length === 0) {
+    wrap.appendChild(Object.assign(document.createElement("span"), {
+      className: "chip-empty",
+      textContent: "No templates yet. Build a quote and save it as a template.",
+    }));
+    return;
+  }
+  presets.forEach((p) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip-btn";
+    chip.textContent = p.name;
+    chip.title = "Load this template";
+    chip.addEventListener("click", () => loadPreset(p.id));
+
+    const x = document.createElement("span");
+    x.className = "chip-x";
+    x.textContent = "×";
+    x.title = "Delete template";
+    x.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!confirm(`Delete template "${p.name}"?`)) return;
+      savePresets(loadPresets().filter((q) => q.id !== p.id));
+      renderPresetChips();
+    });
+    chip.appendChild(x);
+    wrap.appendChild(chip);
+  });
+}
+
+function populateClientPicker() {
+  const sel = $("linkedClient");
+  if (!sel) return;
+  const current = sel.value;
+  const clients = loadStudioClients();
+  sel.innerHTML = "";
+  const none = document.createElement("option");
+  none.value = "";
+  none.textContent = "— None —";
+  sel.appendChild(none);
+  clients.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
 }
 
 function calculate() {
@@ -274,6 +393,12 @@ function calculate() {
     });
   }
 
+  f.customLines.forEach((c) => {
+    if (!c.desc && !c.amt) return;
+    if (c.amt <= 0) return;
+    items.push({ desc: c.desc || "Custom line", amt: c.amt });
+  });
+
   let baseTotal = items.reduce((s, i) => s + i.amt, 0);
 
   if (f.turnaround > 1) {
@@ -299,21 +424,14 @@ function calculate() {
     baseTotal += usageAmt;
   }
 
-  // Apply service minimum
-  const minimum = SERVICE_MIN[f.serviceType] || 0;
-  let subtotal = baseTotal;
-  if (subtotal > 0 && subtotal < minimum) {
-    items.push({
-      desc: `${SERVICE_LABELS[f.serviceType]} package minimum`,
-      amt: minimum - subtotal,
-    });
-    subtotal = minimum;
-  }
-
+  const subtotal = baseTotal;
   const discountAmt = subtotal * (f.discount / 100);
   const afterDiscount = subtotal - discountAmt;
   const taxAmt = afterDiscount * (f.tax / 100);
-  const total = afterDiscount + taxAmt;
+  let total = afterDiscount + taxAmt;
+  if (rates.roundTo && rates.roundTo > 0) {
+    total = Math.round(total / rates.roundTo) * rates.roundTo;
+  }
   const depositAmt = total * (f.deposit / 100);
   const balance = total - depositAmt;
 
@@ -416,15 +534,124 @@ function handleRatesSubmit(e) {
   }
 }
 
+function applyPresetShoot(hours) {
+  $("shootHours").value = hours;
+  render();
+}
+
+function addDeliverablePreset(preset) {
+  deliverables.push({ ...preset });
+  renderDeliverablesList();
+  render();
+}
+
+function applyDiscountPreset(pct) {
+  $("discount").value = pct;
+  render();
+}
+
+function savePresetFromCurrent() {
+  const name = prompt("Template name (e.g. \"Wedding standard\", \"Realtor walkthrough\"):", "");
+  if (!name || !name.trim()) return;
+  const list = loadPresets();
+  const preset = {
+    id: uid(),
+    name: name.trim(),
+    form: readForm(),
+    createdAt: Date.now(),
+  };
+  // Templates are recipes; don't bake in the specific client/project name.
+  preset.form.projectName = "";
+  preset.form.linkedClient = "";
+  list.push(preset);
+  savePresets(list);
+  renderPresetChips();
+}
+
+function loadPreset(id) {
+  const p = loadPresets().find((x) => x.id === id);
+  if (!p) return;
+  const f = p.form;
+  if (f.projectName != null) $("projectName").value = f.projectName || $("projectName").value;
+  if (f.serviceType) $("serviceType").value = f.serviceType;
+  [
+    "shootHours","cameras","extraCrew","locations",
+    "includedRevisions","extraRevisions",
+    "editComplexity","travelMiles","turnaround",
+    "usage","discount","tax","deposit",
+  ].forEach((k) => { if (f[k] != null && $(k)) $(k).value = f[k]; });
+  if (Array.isArray(f.deliverables)) {
+    deliverables = f.deliverables.map((d) => ({ ...d }));
+  }
+  if (Array.isArray(f.customLines)) {
+    customLines = f.customLines.map((c) => ({ ...c }));
+  }
+  if (f.addons) {
+    document.querySelectorAll('[data-addon]').forEach((el) => {
+      el.checked = !!f.addons[el.dataset.addon];
+    });
+  }
+  renderDeliverablesList();
+  renderCustomLines();
+  render();
+}
+
+function saveQuoteToClient() {
+  const clientId = $("linkedClient").value;
+  if (!clientId) {
+    alert("Pick a client from the \"Link to client\" dropdown first.");
+    return;
+  }
+  const r = calculate();
+  const quote = {
+    id: uid(),
+    clientId,
+    projectName: r.f.projectName || "Untitled quote",
+    serviceType: r.f.serviceType,
+    total: r.total,
+    savedAt: Date.now(),
+    form: r.f,
+  };
+  const quotes = loadQuotes();
+  quotes.push(quote);
+  saveQuotes(quotes);
+  const btn = $("saveToClient");
+  const original = btn.textContent;
+  btn.textContent = "Saved!";
+  setTimeout(() => (btn.textContent = original), 1400);
+}
+
 function init() {
   restoreForm();
   renderDeliverablesList();
+  renderCustomLines();
+  populateClientPicker();
+  renderPresetChips();
 
   document.querySelectorAll("#view-calculator input, #view-calculator select").forEach((el) => {
     if (el.closest("#ratesDialog")) return;
     if (el.closest("#deliverablesList")) return; // rows manage their own listeners
+    if (el.closest("#customLinesList")) return;
     el.addEventListener("input", render);
     el.addEventListener("change", render);
+  });
+
+  // Refresh client picker when the calculator tab is shown, in case clients changed.
+  document.querySelectorAll(".tab-nav .tab").forEach((t) => {
+    t.addEventListener("click", () => {
+      if (t.dataset.tab === "calculator") populateClientPicker();
+    });
+  });
+
+  // Auto-fill project name when linking a client (only if empty).
+  $("linkedClient").addEventListener("change", () => {
+    const id = $("linkedClient").value;
+    if (!id) return;
+    const c = loadStudioClients().find((x) => x.id === id);
+    if (c && !$("projectName").value.trim()) {
+      $("projectName").value = c.name;
+      render();
+    }
   });
 
   $("addDeliverable").addEventListener("click", () => {
@@ -432,6 +659,28 @@ function init() {
     renderDeliverablesList();
     render();
   });
+
+  $("addCustomLine").addEventListener("click", () => {
+    customLines.push({ desc: "", amt: 0 });
+    renderCustomLines();
+    render();
+  });
+
+  document.querySelectorAll("[data-preset-shoot]").forEach((btn) => {
+    btn.addEventListener("click", () => applyPresetShoot(+btn.dataset.presetShoot));
+  });
+  document.querySelectorAll("[data-preset-deliv]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      try { addDeliverablePreset(JSON.parse(btn.dataset.presetDeliv)); }
+      catch {}
+    });
+  });
+  document.querySelectorAll("[data-preset-discount]").forEach((btn) => {
+    btn.addEventListener("click", () => applyDiscountPreset(+btn.dataset.presetDiscount));
+  });
+
+  $("savePreset").addEventListener("click", savePresetFromCurrent);
+  $("saveToClient").addEventListener("click", saveQuoteToClient);
 
   $("toggleRates").addEventListener("click", openRatesDialog);
   $("ratesDialog").querySelector("form").addEventListener("submit", handleRatesSubmit);
