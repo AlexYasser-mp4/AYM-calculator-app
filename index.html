@@ -109,26 +109,46 @@
         <button id="toggleRates" class="ghost" type="button">Edit my rates</button>
       </div>
 
+      <h2>Templates</h2>
+      <div id="presetChips" class="chip-row"></div>
+      <div class="chip-row" style="margin-top:6px">
+        <button id="savePreset" class="ghost small" type="button">+ Save current as template</button>
+      </div>
+
       <h2>Project</h2>
 
       <label>Project / client name
         <input id="projectName" type="text" placeholder="e.g. Smith Wedding" />
       </label>
 
-      <label>Service type
-        <select id="serviceType">
-          <option value="wedding">Wedding</option>
-          <option value="event">Event / Conference</option>
-          <option value="corporate">Corporate / Brand</option>
-          <option value="commercial">Commercial / Promo</option>
-          <option value="musicVideo">Music Video</option>
-          <option value="realEstate">Real Estate</option>
-          <option value="socialContent">Social Media Content</option>
-          <option value="documentary">Documentary / Interview</option>
-          <option value="other">Other</option>
-        </select>
-      </label>
+      <div class="row">
+        <label>Link to client (optional)
+          <select id="linkedClient">
+            <option value="">— None —</option>
+          </select>
+        </label>
+        <label>Service type
+          <select id="serviceType">
+            <option value="wedding">Wedding</option>
+            <option value="event">Event / Conference</option>
+            <option value="corporate">Corporate / Brand</option>
+            <option value="commercial">Commercial / Promo</option>
+            <option value="musicVideo">Music Video</option>
+            <option value="realEstate">Real Estate</option>
+            <option value="socialContent">Social Media Content</option>
+            <option value="documentary">Documentary / Interview</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+      </div>
 
+      <label>Shoot day
+        <div class="chip-row" style="margin-top:6px">
+          <button class="chip-btn" data-preset-shoot="4" type="button">Half day (4h)</button>
+          <button class="chip-btn" data-preset-shoot="8" type="button">Full day (8h)</button>
+          <button class="chip-btn" data-preset-shoot="16" type="button">Multi-day (16h)</button>
+        </div>
+      </label>
       <div class="row">
         <label>Shoot hours
           <input id="shootHours" type="number" min="0" step="0.5" value="6" />
@@ -149,6 +169,12 @@
 
       <h2>Post-production</h2>
       <label>Deliverables</label>
+      <div class="chip-row" style="margin: 4px 0 6px">
+        <button class="chip-btn" data-preset-deliv='{"label":"Reel","seconds":15,"qty":1}' type="button">+ Reel 15s</button>
+        <button class="chip-btn" data-preset-deliv='{"label":"Cutdown","seconds":30,"qty":1}' type="button">+ Cutdown 30s</button>
+        <button class="chip-btn" data-preset-deliv='{"label":"Hero video","seconds":60,"qty":1}' type="button">+ Hero 60s</button>
+        <button class="chip-btn" data-preset-deliv='{"label":"Vertical","seconds":30,"qty":1}' type="button">+ Vertical 30s</button>
+      </div>
       <div id="deliverablesList" class="deliverables-list"></div>
       <button id="addDeliverable" type="button" class="ghost small">+ Add deliverable</button>
 
@@ -179,6 +205,11 @@
         <label class="check"><input type="checkbox" data-addon="rawFootage" /> Deliver raw footage</label>
       </div>
 
+      <h2>Custom line items</h2>
+      <p class="muted small" style="margin: 0 0 6px">One-off charges outside your standard rates (permits, props, gear rental, etc.).</p>
+      <div id="customLinesList" class="custom-lines"></div>
+      <button id="addCustomLine" type="button" class="ghost small">+ Add custom line</button>
+
       <h2>Logistics &amp; terms</h2>
       <div class="row">
         <label>Travel distance (miles, round trip)
@@ -206,6 +237,12 @@
         <label>Discount %
           <input id="discount" type="number" min="0" max="100" step="1" value="0" />
         </label>
+      </div>
+      <div class="chip-row" style="margin-top:6px">
+        <button class="chip-btn" data-preset-discount="10" type="button">Referral −10%</button>
+        <button class="chip-btn" data-preset-discount="15" type="button">Repeat client −15%</button>
+        <button class="chip-btn" data-preset-discount="20" type="button">Nonprofit −20%</button>
+        <button class="chip-btn" data-preset-discount="0" type="button">Clear</button>
       </div>
 
       <div class="row">
@@ -238,6 +275,7 @@
 
       <div class="actions">
         <button id="copyQuote" type="button">Copy quote</button>
+        <button id="saveToClient" class="ghost" type="button">Save to client</button>
         <button id="printQuote" class="ghost" type="button">Print / save PDF</button>
         <button id="resetForm" class="ghost danger" type="button">Reset</button>
       </div>
@@ -298,6 +336,14 @@
         <label>$ per mile after
           <input id="r_perMile" type="number" min="0" step="0.01" />
         </label>
+      </div>
+
+      <h3>Rounding</h3>
+      <div class="row">
+        <label>Round total to nearest $ (0 = off)
+          <input id="r_roundTo" type="number" min="0" step="1" />
+        </label>
+        <label>&nbsp;</label>
       </div>
 
       <div class="actions">
