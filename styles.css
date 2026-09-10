@@ -322,6 +322,18 @@ button.icon.danger:hover { color: var(--danger); }
 }
 .rec-row input, .rec-row select { margin-top: 0; }
 
+.deliverables-list { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px; }
+.deliv-row {
+  display: grid;
+  grid-template-columns: 2fr 80px 60px 32px;
+  gap: 8px;
+  align-items: center;
+}
+.deliv-row input { margin-top: 0; }
+@media (max-width: 480px) {
+  .deliv-row { grid-template-columns: 1fr 70px 55px 32px; }
+}
+
 /* --- Tasks --------------------------------------------------- */
 .filter-bar {
   display: flex; justify-content: space-between; align-items: center;

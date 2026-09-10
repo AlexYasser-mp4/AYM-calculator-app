@@ -1,7 +1,10 @@
 "use strict";
 
 /* AYM Studio: clients, scope, tasks, shoot calendar.
-   Data is stored in localStorage under 'aym-studio-v1'. */
+   Data is stored in localStorage under 'aym-studio-v1'.
+   Wrapped in an IIFE so helpers ($, el, uid, ...) don't collide with app.js. */
+
+(function () {
 
 const STORAGE_KEY = "aym-studio-v1";
 
@@ -865,3 +868,5 @@ function seedDemoData() {
 }
 
 document.addEventListener("DOMContentLoaded", initStudio);
+
+})();

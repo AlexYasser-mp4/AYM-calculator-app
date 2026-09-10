@@ -2,11 +2,11 @@
 
 const DEFAULT_RATES = {
   shoot: 150,
-  edit: 75,
+  perMinute: 250,
+  revisionRound: 150,
   crew: 50,
   camera: 100,
   location: 75,
-  deliverable: 100,
   drone: 250,
   gimbal: 100,
   lighting: 150,
@@ -16,6 +16,15 @@ const DEFAULT_RATES = {
   freeMiles: 30,
   perMile: 0.7,
 };
+
+const DEFAULT_DELIVERABLES = [
+  { label: "Hero video", seconds: 60, qty: 1 },
+];
+
+const DELIVERABLE_PRESETS = [
+  "Hero video", "Social cutdown", "Reel / short", "Teaser",
+  "Interview edit", "Recap / highlights", "Vertical version", "Custom",
+];
 
 const SERVICE_LABELS = {
   wedding: "Wedding",
@@ -61,6 +70,8 @@ function saveRates(rates) {
 
 let rates = loadRates();
 
+let deliverables = DEFAULT_DELIVERABLES.map((d) => ({ ...d }));
+
 function readForm() {
   const addons = {};
   document.querySelectorAll('[data-addon]').forEach((el) => {
@@ -73,8 +84,9 @@ function readForm() {
     cameras: +$("cameras").value || 1,
     extraCrew: +$("extraCrew").value || 0,
     locations: +$("locations").value || 1,
-    editHours: +$("editHours").value || 0,
-    deliverables: +$("deliverables").value || 1,
+    deliverables: deliverables.slice(),
+    includedRevisions: +$("includedRevisions").value || 0,
+    extraRevisions: +$("extraRevisions").value || 0,
     editComplexity: +$("editComplexity").value || 1,
     travelMiles: +$("travelMiles").value || 0,
     turnaround: +$("turnaround").value || 1,
@@ -96,16 +108,87 @@ function restoreForm() {
     if (f.projectName != null) $("projectName").value = f.projectName;
     if (f.serviceType) $("serviceType").value = f.serviceType;
     [
-      "shootHours","cameras","extraCrew","locations","editHours",
-      "deliverables","editComplexity","travelMiles","turnaround",
+      "shootHours","cameras","extraCrew","locations",
+      "includedRevisions","extraRevisions",
+      "editComplexity","travelMiles","turnaround",
       "usage","discount","tax","deposit",
-    ].forEach((k) => { if (f[k] != null) $(k).value = f[k]; });
+    ].forEach((k) => { if (f[k] != null && $(k)) $(k).value = f[k]; });
+    if (Array.isArray(f.deliverables) && f.deliverables.length) {
+      deliverables = f.deliverables.map((d) => ({
+        label: String(d.label || "Deliverable"),
+        seconds: +d.seconds || 0,
+        qty: +d.qty || 1,
+      }));
+    }
     if (f.addons) {
       document.querySelectorAll('[data-addon]').forEach((el) => {
         el.checked = !!f.addons[el.dataset.addon];
       });
     }
   } catch {}
+}
+
+function renderDeliverablesList() {
+  const wrap = $("deliverablesList");
+  wrap.innerHTML = "";
+  deliverables.forEach((d, idx) => {
+    const row = document.createElement("div");
+    row.className = "deliv-row";
+
+    const label = document.createElement("input");
+    label.type = "text";
+    label.placeholder = "Deliverable name";
+    label.value = d.label;
+    label.setAttribute("list", "deliverablePresets");
+    label.addEventListener("input", (e) => { deliverables[idx].label = e.target.value; render(); });
+
+    const secs = document.createElement("input");
+    secs.type = "number";
+    secs.min = "0";
+    secs.step = "1";
+    secs.placeholder = "sec";
+    secs.title = "Length in seconds";
+    secs.value = d.seconds;
+    secs.addEventListener("input", (e) => { deliverables[idx].seconds = +e.target.value || 0; render(); });
+
+    const qty = document.createElement("input");
+    qty.type = "number";
+    qty.min = "1";
+    qty.step = "1";
+    qty.placeholder = "qty";
+    qty.title = "Quantity";
+    qty.value = d.qty;
+    qty.addEventListener("input", (e) => { deliverables[idx].qty = +e.target.value || 1; render(); });
+
+    const rm = document.createElement("button");
+    rm.type = "button";
+    rm.className = "icon danger";
+    rm.title = "Remove";
+    rm.textContent = "×";
+    rm.addEventListener("click", () => {
+      deliverables.splice(idx, 1);
+      if (deliverables.length === 0) deliverables.push({ label: "Deliverable", seconds: 60, qty: 1 });
+      renderDeliverablesList();
+      render();
+    });
+
+    row.appendChild(label);
+    row.appendChild(secs);
+    row.appendChild(qty);
+    row.appendChild(rm);
+    wrap.appendChild(row);
+  });
+
+  if (!document.getElementById("deliverablePresets")) {
+    const dl = document.createElement("datalist");
+    dl.id = "deliverablePresets";
+    DELIVERABLE_PRESETS.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      dl.appendChild(opt);
+    });
+    document.body.appendChild(dl);
+  }
 }
 
 function calculate() {
@@ -144,21 +227,26 @@ function calculate() {
     });
   }
 
-  if (f.editHours > 0) {
-    const editBase = rates.edit * f.editHours;
-    const editAmt = editBase * f.editComplexity;
-    const cmxLabel = f.editComplexity > 1 ? ` × ${f.editComplexity}× complexity` : "";
+  // Post-production: priced per finished minute of video, per deliverable line.
+  const cmxLabel = f.editComplexity > 1 ? ` × ${f.editComplexity}× complexity` : "";
+  f.deliverables.forEach((d) => {
+    const minutes = (d.seconds || 0) / 60;
+    if (minutes <= 0 || d.qty <= 0) return;
+    const each = rates.perMinute * minutes * f.editComplexity;
+    const total = each * d.qty;
+    const lenLabel = d.seconds >= 60
+      ? `${(minutes).toFixed(minutes % 1 === 0 ? 0 : 1)} min`
+      : `${d.seconds}s`;
     items.push({
-      desc: `Editing — ${f.editHours}h @ ${fmt(rates.edit)}/h${cmxLabel}`,
-      amt: editAmt,
+      desc: `${d.label || "Deliverable"} — ${d.qty} × ${lenLabel} @ ${fmt(rates.perMinute)}/min${cmxLabel}`,
+      amt: total,
     });
-  }
+  });
 
-  if (f.deliverables > 1) {
-    const delAmt = rates.deliverable * (f.deliverables - 1);
+  if (f.extraRevisions > 0 && rates.revisionRound > 0) {
     items.push({
-      desc: `${f.deliverables - 1} extra deliverable${f.deliverables - 1 > 1 ? "s" : ""}`,
-      amt: delAmt,
+      desc: `${f.extraRevisions} extra revision round${f.extraRevisions > 1 ? "s" : ""} (${f.includedRevisions} included)`,
+      amt: rates.revisionRound * f.extraRevisions,
     });
   }
 
@@ -330,11 +418,19 @@ function handleRatesSubmit(e) {
 
 function init() {
   restoreForm();
+  renderDeliverablesList();
 
-  document.querySelectorAll("input, select").forEach((el) => {
+  document.querySelectorAll("#view-calculator input, #view-calculator select").forEach((el) => {
     if (el.closest("#ratesDialog")) return;
+    if (el.closest("#deliverablesList")) return; // rows manage their own listeners
     el.addEventListener("input", render);
     el.addEventListener("change", render);
+  });
+
+  $("addDeliverable").addEventListener("click", () => {
+    deliverables.push({ label: "Deliverable", seconds: 30, qty: 1 });
+    renderDeliverablesList();
+    render();
   });
 
   $("toggleRates").addEventListener("click", openRatesDialog);
